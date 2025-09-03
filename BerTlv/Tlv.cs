@@ -30,7 +30,7 @@ namespace BerTlv
         /// <summary>
         /// The raw TLV data.
         /// </summary>
-        public string HexData { get { return GetHexString(Data); } }
+        public string HexData { get { return Convert.ToHexString(Data); } }
 
         /// <summary>
         /// The TLV tag.
@@ -68,7 +68,7 @@ namespace BerTlv
         /// <summary>
         /// The TLV value.
         /// </summary>
-        public string HexValue { get { return GetHexString(Value); } }
+        public string HexValue { get { return Convert.ToHexString(Value);} }
 
         /// <summary>
         /// TLV children.
@@ -102,12 +102,9 @@ namespace BerTlv
         /// <returns>A collection of TLVs.</returns>
         public static ICollection<Tlv> ParseTlv(string tlv)
         {
-            if(string.IsNullOrWhiteSpace(tlv))
-            {
-                throw new ArgumentException("tlv");
-            }
+            ArgumentNullException.ThrowIfNullOrWhiteSpace(tlv);
 
-            return ParseTlv(GetBytes(tlv));
+            return ParseTlv(Convert.FromHexString(tlv));
         }
 
         /// <summary>
@@ -174,26 +171,6 @@ namespace BerTlv
                     ParseTlv(tlv.Value, tlv.Children);
                 }
             }
-        }
-
-        private static string GetHexString(byte[] arr)
-        {
-            var sb = new StringBuilder(arr.Length * 2);
-            foreach(byte b in arr)
-            {
-                sb.AppendFormat("{0:X2}", b);
-            }
-
-            return sb.ToString();
-        }
-
-        private static byte[] GetBytes(string hexString)
-        {
-            return Enumerable
-                .Range(0, hexString.Length)
-                .Where(x => x % 2 == 0)
-                .Select(x => Convert.ToByte(hexString.Substring(x, 2), 16))
-                .ToArray();
         }
 
         private static int GetInt(byte[] data, int offset, int length)
